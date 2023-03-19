@@ -124,5 +124,3 @@ def verify(M, S1, S2, e2):
         return True
     else:
         return False
-
-## fucking test
