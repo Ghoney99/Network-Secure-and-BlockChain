@@ -3,6 +3,12 @@ import random
 import time
 import hashlib
 
+p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
+G = [0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,
+     0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8]
+a = 0
+b=7
+
 
 def get_private_key():
     while (True):
@@ -79,50 +85,63 @@ def double_and_add(x, G: list):
     return tuple(K)
 
 
-# ECDSA 알고리즘 파라미터 설정
 p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
-e1 = (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,
-      0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8)
+e1 = (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798, 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8)
 q = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
-
-# 개인키 d
-d = 0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-# 공개키 e2
-e2 = (0xc8b4f4a1d4a825e12973b8a173f5d92b2c5e71686a5935c6c62a44f736f6b587,
-      0xe6ec1e6e0d6fe9c704f119677d237ef57ab270f924b142243a6f97d981c372a6)
 
 
 def sign(M, d):
     while True:
-        # 해싱으로 메세지 다이제스트 생성
-        h = hashlib.sha256(M.encode()).hexdigest()
         # 1<r<q-1 범위의 임의의수 r을 생성
         r = random.randint(1, q-1)
-        # 스칼라 
-        #########################
-        #### P = scalar_mult(r, e1) -> P=(x1,y1)
-        #########################
+        x1, y1 = double_and_add(r, e1)
         S1 = x1 % q
+
+        # 해싱으로 메세지 다이제스트 생성
+
         if S1 == 0:
             continue
-        S2 = ((int(h, 16)+d+S1)*find_inverse(r, q)) % q
-        if S2 != 0:
-            break
-    return S1, S2
+        h=int.from_bytes(hashlib.sha256(M.encode()).digest()) % q
+        S2 = ((h + d * S1)*find_inverse(r, q)) % q
+        if S2 == 0:
+            continue
+        
+        return S1, S2
 
 
 def verify(M, S1, S2, e2):
     h = hashlib.sha256(M.encode()).hexdigest()
     S2_inverse = find_inverse(S2, q)
-    A = (h*S2_inverse)%q
+    A = (int(h,16)*S2_inverse)%q
     B = (S1*S2_inverse)%q
-    #########################
-    ### T = add(scalar_mult(A, e1),  scalar_mult(B, e2)) T=(x, y)
-    #########################
+    print("\tA =",hex(A))
+    print("\tB =",hex(B))
+
+    x, y = add(double_and_add(A, e1),  double_and_add(B, e2))
 
     if x % q == S1 % q:
         return True
     else:
         return False
 
-        #fucking test
+if __name__ == "__main__":
+    # 개인키 d
+    d = get_private_key()
+    # 공개키 e2
+    e2 = double_and_add(d, G)
+
+    M = input("메시지? ")
+    S1, S2 = sign(M, d)
+    print("1. Sign:")
+    print("\tS1 =", hex(S1))
+    print("\tS2 =", hex(S2))
+    print("2. 정확한 서명을 입력할 경우:")
+    if verify(M, S1, S2, e2) == True:
+        print("검증 성공")
+    else:
+        print("검증 실패")
+    print("3. 잘못된 서명을 입력할 경우:")
+    if verify(M, S1-1, S2-1, e2) == True:
+        print("검증 성공")
+    else:
+        print("검증 실패")
