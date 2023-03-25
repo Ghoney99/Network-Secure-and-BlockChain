@@ -127,24 +127,29 @@ def find_bitcoin_addr(want_str):
         public_key = double_and_add(private_key, G)
         hex_public_key = (hex(public_key[0]), hex(public_key[1]))
         addr = get_bitcoin_addr(hex_public_key)
-        print(addr)
-
+    
+    print("주소 =", addr)
 
 
 
 #Base-58 alphabet은 (0, O, I, l) 을 제외한 58개의 문자로 구성하기 때문에 (0, O, I, l)이 없는 문자열을 입력받아야 함
 def is_vaild_str(str):
-    invaild_char = ["0", "O", "I", "l"]
+    base58_alphabet = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
+     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N',
+      'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b',
+       'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p',
+        'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
     for c in str:
-        if c in invaild_char:
+        if c not in base58_alphabet:
             return False
     return True
 
 
-want_str = input("희망하는 주소의 문자열")
-if is_vaild_str(want_str)==False:
-    print("0,O,I,l이 들어간 문자열은 사용할수 없습니다")
-    want_str = input("희망하는 주소의 문자열")
+want_str = input("희망하는 주소의 문자열 ")
+while is_vaild_str(want_str)==False:
+    print("Base-58에 사용되는 문자가 아닙니다.")
+    want_str = input("희망하는 주소의 문자열 ")
 
 find_bitcoin_addr(want_str)
 
