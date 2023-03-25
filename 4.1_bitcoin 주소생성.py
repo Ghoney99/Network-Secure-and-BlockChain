@@ -73,11 +73,10 @@ public_key = double_and_add(private_key, G)
 hex_public_key = (hex(public_key[0]), hex(public_key[1]))
 
 #1. Take the corresponding public key generated with it (33 bytes, 1 byte 0x02 (y-coord is even), and 32 bytes corresponding to X coordinate)
-if(public_key[1]%2==0):
-    x="02"+str(hex_public_key[0])[2:]
+if(int(hex_public_key[1], 16)%2==0):
+    x="02"+str(hex_public_key[0])[2:].zfill(64)
 else:
-    x="03"+str(hex_public_key[0])[2:]
-
+    x="03"+str(hex_public_key[0])[2:].zfill(64)
 #2. SHA-256 hashing
 x=bytes.fromhex(x)
 x=hashlib.sha256(x).digest()

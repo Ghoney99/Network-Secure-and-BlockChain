@@ -83,10 +83,10 @@ def double_and_add(x, G: list):
 
 def get_bitcoin_addr(hex_public_key : list):
     #1. Take the corresponding public key generated with it (33 bytes, 1 byte 0x02 (y-coord is even), and 32 bytes corresponding to X coordinate)
-    if(public_key[1]%2==0):
-        x="02"+str(hex_public_key[0])[2:]
+    if(int(hex_public_key[1], 16)%2==0):
+        x="02"+str(hex_public_key[0])[2:].zfill(64)
     else:
-        x="03"+str(hex_public_key[0])[2:]
+        x="03"+str(hex_public_key[0])[2:].zfill(64)
 
     #2. SHA-256 hashing
     x=bytes.fromhex(x)
@@ -116,22 +116,35 @@ def get_bitcoin_addr(hex_public_key : list):
     bitcoin_addr = base58check.b58encode(bitcoin_addr)
     return str(bitcoin_addr)[2:-1]
 
-def find_bitcoin_addr(want_str, hex_public_key):
-    if "0" in want_str or "O" in want_str or "I" in want_str or "l" in want_str:
-        print("0,O,I,l이 들어간 문자열은 사용할수 없습니다")
-        want_str = input("희망하는 주소의 문자열")
-        find_bitcoin_addr(want_str, hex_public_key)
+def find_bitcoin_addr(want_str): 
+    private_key = get_private_key()
+    public_key = double_and_add(private_key, G)
+    hex_public_key = (hex(public_key[0]), hex(public_key[1]))
+    addr=get_bitcoin_addr(hex_public_key)
 
-    addr = get_bitcoin_addr(hex_public_key)
-
-    if want_str == addr[1:len(want_str) + 1]:
+    while want_str != addr[1:len(want_str)+1]:
+        private_key = get_private_key()
+        public_key = double_and_add(private_key, G)
+        hex_public_key = (hex(public_key[0]), hex(public_key[1]))
+        addr = get_bitcoin_addr(hex_public_key)
         print(addr)
-    else:
-        find_bitcoin_addr(want_str, hex_public_key)
 
 
-private_key = get_private_key()
-public_key = double_and_add(private_key, G)
-hex_public_key = (hex(public_key[0]), hex(public_key[1]))
+
+
+#Base-58 alphabet은 (0, O, I, l) 을 제외한 58개의 문자로 구성하기 때문에 (0, O, I, l)이 없는 문자열을 입력받아야 함
+def is_vaild_str(str):
+    invaild_char = ["0", "O", "I", "l"]
+    for c in str:
+        if c in invaild_char:
+            return False
+    return True
+
+
 want_str = input("희망하는 주소의 문자열")
-find_bitcoin_addr(want_str, hex_public_key)
+if is_vaild_str(want_str)==False:
+    print("0,O,I,l이 들어간 문자열은 사용할수 없습니다")
+    want_str = input("희망하는 주소의 문자열")
+
+find_bitcoin_addr(want_str)
+
