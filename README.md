@@ -306,18 +306,4 @@
 - 이 컨트랙트는 교육 목적으로 작성된 것이며, 실제 환경에서 사용하기 전에 충분한 테스트가 필요합니다.
 - 경매의 입찰가는 이더리움의 실시간 가격 변동에 따라 다를 수 있습니다.
 
-## 라이선스
 
-이 프로젝트는 [MIT 라이선스](LICENSE)에 따라 라이선스가 부여됩니다.
-
-## 기여 방법
-
-1. 이 저장소를 포크합니다.
-2. 새 브랜치를 생성합니다: `git checkout -b feature/AmazingFeature`
-3. 변경 사항을 커밋합니다: `git commit -m 'Add some AmazingFeature'`
-4. 브랜치에 푸시합니다: `git push origin feature/AmazingFeature`
-5. Pull Request를 생성합니다.
-
-## 문의사항
-
-질문이나 제안사항이 있으시면 이슈를 생성해 주세요.
